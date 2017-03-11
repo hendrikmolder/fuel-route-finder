@@ -40,7 +40,9 @@ angular.module('starter', ['ionic', 'ngCordova'])
 
 .controller('MapCtrl', function($scope, $state, $cordovaGeolocation) {
   var options = {timeout: 10000, enableHighAccuracy: true};
- 
+
+  globalScope = $scope;
+
   $cordovaGeolocation.getCurrentPosition(options).then(function(position){
  
     var userCurrentLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
@@ -65,6 +67,8 @@ angular.module('starter', ['ionic', 'ngCordova'])
     console.log("Could not get location");
   });
 });
+
+var globalScope;
 
 function add_marker_current_location($scope, userCurrentLocation){
   google.maps.event.addListenerOnce($scope.map, 'idle', function(){

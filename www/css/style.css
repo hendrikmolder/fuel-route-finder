@@ -1,1 +1,19 @@
 /* Empty. Add your own CSS if you like */
+p.padding {
+    padding-bottom: 1cm;
+}
+
+p.padding2 {
+    padding-bottom: 5cm;
+}
+
+.img-circular{
+ width: 200px;
+ height: 200px;
+ background-image: url('https://images-na.ssl-images-amazon.com/images/I/31%2BmA9V2s1L.jpg');
+ background-size: cover;
+ display: block;
+ border-radius: 100px;
+ -webkit-border-radius: 100px;
+ -moz-border-radius: 100px;
+}

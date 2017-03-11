@@ -80,6 +80,14 @@ module.exports = [
         "clobbers": [
             "navigator.geolocation"
         ]
+    },
+    {
+        "file": "plugins/cordova-sqlite-storage/www/SQLitePlugin.js",
+        "id": "cordova-sqlite-storage.SQLitePlugin",
+        "pluginId": "cordova-sqlite-storage",
+        "clobbers": [
+            "SQLitePlugin"
+        ]
     }
 ];
 module.exports.metadata = 
@@ -92,7 +100,8 @@ module.exports.metadata =
     "cordova-plugin-whitelist": "1.3.2",
     "ionic-plugin-keyboard": "2.2.1",
     "cordova-plugin-compat": "1.1.0",
-    "cordova-plugin-geolocation": "2.4.2"
+    "cordova-plugin-geolocation": "2.4.2",
+    "cordova-sqlite-storage": "1.5.3"
 }
 // BOTTOM OF METADATA
 });

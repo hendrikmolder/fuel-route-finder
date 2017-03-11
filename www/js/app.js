@@ -188,11 +188,6 @@ var request = {
 // Perform the search
 service.nearbySearch(request, function(results, status){
   if (status == google.maps.places.PlacesServiceStatus.OK) {
-    for (var i = 0; i < 10; i++) {
-      createMarker(results[i]);
-      calculate_path_distance_between(userCurrentLocation, results[i].geometry.location, directionsService, function(dist){
-    //console.log(results);
-    //console.log("Callback: Number of results: " + results.length);
     for (var i = 0; i < Math.min(10, results.length); i++) {
       createMarker(results[i]);
       //console.log(results[i].geometry.location);
@@ -207,6 +202,7 @@ service.nearbySearch(request, function(results, status){
     });
     }
   }
+
   else{
     console.log("error on callback of search  " + results + status);
   }

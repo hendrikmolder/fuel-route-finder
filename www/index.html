@@ -30,27 +30,12 @@
     <script src="js/app.js"></script>
   </head>
   <body ng-app="starter">
-    
-    <ion-pane>
-      <ion-menu [content]="content">
-      <ion-header>
-        <ion-toolbar>
-          <ion-title>Menu</ion-title>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content>
-        <ion-list>
-          Login
-        </ion-list>
-      </ion-content>
-    </ion-menu>
-    <ion-nav id="nav" #content [root]="rootPath"></ion-nav>
-      <ion-header-bar class="bar-stable">
-        <h1 class="title">Ionic Maps</h1>
-      </ion-header-bar>
-      <ion-nav-view></ion-nav-view>
-      
-    </ion-pane>
+    <ion-nav-bar>
+      <ion-nav-back-button class="button button-clear button-positive">
+        Back
+      </ion-nav-back-button>
+    </ion-nav-bar>
+    <ion-nav-view></ion-nav-view>
   </body>
 
   <script src="lib/ngCordova/dist/ng-cordova.js"></script>

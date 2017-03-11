@@ -53,18 +53,23 @@ angular.module('starter', ['ionic', 'ngCordova'])
  
     $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
  
-    // add a marker
-    google.maps.event.addListenerOnce($scope.map, 'idle', function(){
-     
-      var marker = new google.maps.Marker({
-          map: $scope.map,
-          animation: google.maps.Animation.DROP,
-          position: latLng
-      });      
-     
-    });
+    // add marker to current location
+    add_marker_current_location($scope, latLng);
 
   }, function(error){
     console.log("Could not get location");
   });
 });
+
+
+function add_marker_current_location($scope, latLng){
+  google.maps.event.addListenerOnce($scope.map, 'idle', function(){
+   
+    var marker = new google.maps.Marker({
+        map: $scope.map,
+        animation: google.maps.Animation.DROP,
+        position: latLng
+    });      
+   
+  });
+}

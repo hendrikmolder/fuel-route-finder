@@ -3,6 +3,11 @@
 // angular.module is a global place for creating, registering and retrieving Angular modules
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
+
+var globalScope;
+var userCurrentLocation;
+var directionsService;
+
 angular.module('starter', ['ionic'])
 // require ngCordova
 angular.module('starter', ['ionic', 'ngCordova'])
@@ -46,8 +51,10 @@ angular.module('starter', ['ionic', 'ngCordova'])
   var options = {timeout: 10000, enableHighAccuracy: true};
  
   $cordovaGeolocation.getCurrentPosition(options).then(function(position){
+
+    globalScope = $scope;
  
-    var userCurrentLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+    userCurrentLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
  
     var mapOptions = {
       center: userCurrentLocation,
@@ -57,39 +64,32 @@ angular.module('starter', ['ionic', 'ngCordova'])
  
     $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
-    var directionsService = new google.maps.DirectionsService();
- 
-    // add marker to current location
-    add_marker_current_location($scope, userCurrentLocation);
+    // init direction service
+    directionsService = new google.maps.DirectionsService();
 
-    // calculate distance between current location and X
-    calculate_path_distance_between(userCurrentLocation, 'Trafford Park', $scope, directionsService);
+    ///////////////////////////////////////////////////////////////////////
+    // all functions must be called asynchronously (after gmaps API loaded)
+    do_setup();
 
-    // Test for search
-    search($scope, userCurrentLocation, 500, 'store');
 
   }, function(error){
     console.log("Could not get location");
   });
 })
 
-.controller('MainPageController', function($scope, $state) {
-
-});
-
-function add_marker_current_location($scope, userCurrentLocation){
-  google.maps.event.addListenerOnce($scope.map, 'idle', function(){
+function add_marker_at_location(location){
+  google.maps.event.addListenerOnce(globalScope.map, 'idle', function(){
    
     var marker = new google.maps.Marker({
-        map: $scope.map,
+        map: globalScope.map,
         animation: google.maps.Animation.DROP,
-        position: userCurrentLocation
+        position: location
     });     
    
   });
 }
 
-function calculate_path_distance_between(latLngOrigin, latLngDestination, $scope, directionsService){
+function calculate_path_distance_between(latLngOrigin, latLngDestination, directionsService){
 
   // request dict to pass to directionService
   var request = {
@@ -112,17 +112,17 @@ function calculate_path_distance_between(latLngOrigin, latLngDestination, $scope
 }
 
 // A method to create a marker on the position of a given place
-function createMarker($scope, place) {
+function createMarker(place) {
   var placeLoc = place.geometry.location;
   var marker = new google.maps.Marker({
-  map: $scope.map,
+  map: globalScope.map,
   position: place.geometry.location 
   });
 }
 
 // A method to search for places 
-function search($scope, currentLocation, radius, placeType){
-  var service = new google.maps.places.PlacesService($scope.map);
+function search(currentLocation, radius, placeType){
+  var service = new google.maps.places.PlacesService(globalScope.map);
 
   // The specifications for the search
   var request = {
@@ -140,8 +140,19 @@ function search($scope, currentLocation, radius, placeType){
 
       console.log("Callback: Number of results - " + results.length);
       for (var i = 0; i < results.length; i++) {
-        createMarker($scope, results[i]);
+        createMarker(results[i]);
       }
     }
   }
+}
+
+function do_setup(){
+// add marker to current location
+add_marker_at_location(userCurrentLocation);
+
+// calculate distance between current location and X
+calculate_path_distance_between(userCurrentLocation, 'Trafford Park', directionsService);
+
+// Test for search
+search(userCurrentLocation, 5000, 'gas_station');
 }

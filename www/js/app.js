@@ -43,33 +43,59 @@ angular.module('starter', ['ionic', 'ngCordova'])
  
   $cordovaGeolocation.getCurrentPosition(options).then(function(position){
  
-    var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+    var userCurrentLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
  
     var mapOptions = {
-      center: latLng,
+      center: userCurrentLocation,
       zoom: 15,
       mapTypeId: google.maps.MapTypeId.ROADMAP
     };
  
     $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
+
+    var directionsService = new google.maps.DirectionsService();
  
     // add marker to current location
-    add_marker_current_location($scope, latLng);
+    add_marker_current_location($scope, userCurrentLocation);
+
+    // calculate distance between current location and X
+    calculate_path_distance_between(userCurrentLocation, 'Trafford Park', $scope, directionsService);
 
   }, function(error){
     console.log("Could not get location");
   });
 });
 
-
-function add_marker_current_location($scope, latLng){
+function add_marker_current_location($scope, userCurrentLocation){
   google.maps.event.addListenerOnce($scope.map, 'idle', function(){
    
     var marker = new google.maps.Marker({
         map: $scope.map,
         animation: google.maps.Animation.DROP,
-        position: latLng
-    });      
+        position: userCurrentLocation
+    });     
    
   });
+}
+
+function calculate_path_distance_between(latLngOrigin, latLngDestination, $scope, directionsService){
+
+  // request dict to pass to directionService
+  var request = {
+                // latLng of users current location
+    origin      : latLngOrigin, // a city, full address, landmark etc
+    destination : latLngDestination,
+    travelMode  : google.maps.DirectionsTravelMode.DRIVING
+  };
+  
+  directionsService.route(request, function(response, status) {
+    if ( status == google.maps.DirectionsStatus.OK ) {
+      // distance in metres
+      console.log(response.routes[0].legs[0].distance.value);
+    }
+    else {
+      console.log("Error calling calculate_path_distance_between().");
+    }
+  });
+
 }

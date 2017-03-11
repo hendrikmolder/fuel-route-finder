@@ -33,39 +33,43 @@ angular.module('starter', ['ionic', 'ngCordova'])
 })
 
 .config(function($stateProvider, $urlRouterProvider) {
- 
+
   $stateProvider
     .state('landing', {
       url: '/',
       templateUrl: 'templates/landing.html',
+    })
+    .state('settings', {
+      url: '/settings',
+      templateUrl: 'templates/settings.html'
     })
     .state('map', {
       url: '/map',
       templateUrl: 'templates/map.html',
       controller: 'MapCtrl',
     })
- 
+
   $urlRouterProvider.otherwise("/");
- 
+
 })
 
 .controller('MapCtrl', function($scope, $state, $cordovaGeolocation) {
   var options = {timeout: 10000, enableHighAccuracy: true};
- 
+
   $cordovaGeolocation.getCurrentPosition(options).then(function(position){
 
     globalScope = $scope;
- 
+
     userCurrentLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 
     litersPerKilometer = 1.5;
- 
+
     var mapOptions = {
       center: userCurrentLocation,
       zoom: 15,
       mapTypeId: google.maps.MapTypeId.ROADMAP
     };
- 
+
     $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
     // init direction service
@@ -79,17 +83,17 @@ angular.module('starter', ['ionic', 'ngCordova'])
   }, function(error){
     console.log("Could not get location");
   });
-}) // controller 
+}) // controller
 
 function add_marker_at_location(location){
   google.maps.event.addListenerOnce(globalScope.map, 'idle', function(){
-   
+
     var marker = new google.maps.Marker({
         map: globalScope.map,
         animation: google.maps.Animation.DROP,
         position: location
-    });     
-   
+    });
+
   });
 }
 
@@ -102,7 +106,7 @@ function calculate_path_distance_between(latLngOrigin, latLngDestination, direct
     destination : latLngDestination,
     travelMode  : google.maps.DirectionsTravelMode.DRIVING
   };
-  
+
   directionsService.route(request, function(response, status) {
     if ( status == google.maps.DirectionsStatus.OK ) {
       // distance in metres
@@ -121,11 +125,11 @@ function createMarker(place) {
   var placeLoc = place.geometry.location;
   var marker = new google.maps.Marker({
   map: globalScope.map,
-  position: place.geometry.location 
+  position: place.geometry.location
   });
 }
 
-// A method to search for places 
+// A method to search for places
 function search(currentLocation, radius, placeType){
   var service = new google.maps.places.PlacesService(globalScope.map);
 
@@ -167,7 +171,7 @@ search(userCurrentLocation, 5000, 'gas_station');
 
 function costForDistance(costPerGallon, distance){
   console.log(costPerGallon + " " + distance);
-  var distanceInMiles = distance / 1609.344; 
+  var distanceInMiles = distance / 1609.344;
   var cost = distanceInMiles * gallonsPerMile * costPerGallon;
 
   return cost;

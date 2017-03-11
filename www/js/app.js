@@ -57,8 +57,6 @@ angular.module('starter', ['ionic', 'ngCordova'])
     globalScope = $scope;
  
     userCurrentLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-
-    litersPerKilometer = 1.5;
  
     var mapOptions = {
       center: userCurrentLocation,
@@ -95,7 +93,7 @@ function add_marker_at_location(location){
 
 function calculate_path_distance_between(latLngOrigin, latLngDestination, directionsService, callback){
 
-  console.log("LatLngDestination (geometry.location of array): " + typeof(latLngDestination));
+  //console.log("LatLngDestination (geometry.location of array): " + typeof(latLngDestination));
   
   // request dict to pass to directionService
   var request = {
@@ -112,8 +110,13 @@ function calculate_path_distance_between(latLngOrigin, latLngDestination, direct
       // distance in metres
       //console.log("Distance " + response.routes[0].legs[0].distance.value);
     }
+    else if (status == "OVER_QUERY_LIMIT"){
+      calculate_path_distance_between(latLngOrigin, latLngDestination, directionsService, callback);
+    }
     else {
-      console.log("Error calling calculate_path_distance_between():");
+      console.log("Error calling calculate_path_distance_between(): ");
+      console.log(response);
+      console.log(status);
     }
   });
 }
@@ -149,19 +152,27 @@ service.nearbySearch(request, function(results, status){
   if (status == google.maps.places.PlacesServiceStatus.OK) {
     //console.log(results);
     //console.log("Callback: Number of results: " + results.length);
-    parsed_results = results;
-    for (var i = 0; i < parsed_results.length; i++) {
+    for (var i = 0; i < 10; i++) {
       createMarker(results[i]);
       //console.log(results[i].geometry.location);
     // console.log("Gas station number " + i );
     calculate_path_distance_between(userCurrentLocation, results[i].geometry.location, directionsService, function(dist){
       console.log(dist);
     });
+    }
+  }
     // console.log(dist);
     // cost = costForDistance(2, 5);
     // //console.log("Cost " + costForDistance(1.5, dist));
-    }
-  }
+  //   setTimeout(function(){
+  //   for (var i = results.length/2; i < results.length; i++) {
+  //     createMarker(results[i]);
+  //     //console.log(results[i].geometry.location);
+  //   // console.log("Gas station number " + i );
+  //   calculate_path_distance_between(userCurrentLocation, results[i].geometry.location, directionsService, function(dist){
+  //     console.log(dist);
+  //   });}}, 5000);
+  // }
   else{
     console.log("error on callback of search  " + results + status);
   }

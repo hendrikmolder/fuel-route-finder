@@ -42,17 +42,24 @@ angular.module('starter', ['ionic', 'ngCordova'])
   var options = {timeout: 10000, enableHighAccuracy: true};
 
   $cordovaGeolocation.getCurrentPosition(options).then(function(position){
+<<<<<<< HEAD
 
     var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 
+=======
+ 
+    var userCurrentLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+ 
+>>>>>>> ca26d33b236b61c999f62b36e0abf65cca7c889b
     var mapOptions = {
-      center: latLng,
+      center: userCurrentLocation,
       zoom: 15,
       mapTypeId: google.maps.MapTypeId.ROADMAP
     };
 
     $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
+<<<<<<< HEAD
     // add a marker
     google.maps.event.addListenerOnce($scope.map, 'idle', function(){
 
@@ -63,8 +70,51 @@ angular.module('starter', ['ionic', 'ngCordova'])
       });
 
     });
+=======
+    var directionsService = new google.maps.DirectionsService();
+ 
+    // add marker to current location
+    add_marker_current_location($scope, userCurrentLocation);
+
+    // calculate distance between current location and X
+    calculate_path_distance_between(userCurrentLocation, 'Trafford Park', $scope, directionsService);
+>>>>>>> ca26d33b236b61c999f62b36e0abf65cca7c889b
 
   }, function(error){
     console.log("Could not get location");
   });
 });
+
+function add_marker_current_location($scope, userCurrentLocation){
+  google.maps.event.addListenerOnce($scope.map, 'idle', function(){
+   
+    var marker = new google.maps.Marker({
+        map: $scope.map,
+        animation: google.maps.Animation.DROP,
+        position: userCurrentLocation
+    });     
+   
+  });
+}
+
+function calculate_path_distance_between(latLngOrigin, latLngDestination, $scope, directionsService){
+
+  // request dict to pass to directionService
+  var request = {
+                // latLng of users current location
+    origin      : latLngOrigin, // a city, full address, landmark etc
+    destination : latLngDestination,
+    travelMode  : google.maps.DirectionsTravelMode.DRIVING
+  };
+  
+  directionsService.route(request, function(response, status) {
+    if ( status == google.maps.DirectionsStatus.OK ) {
+      // distance in metres
+      console.log(response.routes[0].legs[0].distance.value);
+    }
+    else {
+      console.log("Error calling calculate_path_distance_between().");
+    }
+  });
+
+}

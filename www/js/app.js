@@ -33,11 +33,15 @@ angular.module('starter', ['ionic', 'ngCordova'])
 .config(function($stateProvider, $urlRouterProvider) {
  
   $stateProvider
-  .state('map', {
-    url: '/',
-    templateUrl: 'templates/map.html',
-    controller: 'MapCtrl'
-  });
+    .state('landing', {
+      url: '/',
+      templateUrl: 'templates/landing.html',
+    })
+    .state('map', {
+      url: '/map',
+      templateUrl: 'templates/map.html',
+      controller: 'MapCtrl',
+    })
  
   $urlRouterProvider.otherwise("/");
  
@@ -45,9 +49,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
 
 .controller('MapCtrl', function($scope, $state, $cordovaGeolocation) {
   var options = {timeout: 10000, enableHighAccuracy: true};
-
-  globalScope = $scope;
-
+ 
   $cordovaGeolocation.getCurrentPosition(options).then(function(position){
  
     userCurrentLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
@@ -71,7 +73,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
   }, function(error){
     console.log("Could not get location");
   });
-});
+})
 
 function add_marker_at_location(location){
   google.maps.event.addListenerOnce(globalScope.map, 'idle', function(){

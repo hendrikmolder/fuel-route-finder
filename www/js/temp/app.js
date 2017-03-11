@@ -63,22 +63,23 @@ angular.module('starter', ['ionic', 'ngCordova'])
     // init direction service
     directionsService = new google.maps.DirectionsService();
 
+    ///////////////////////////////////////////////////////////////////////
     // all functions must be called asynchronously (after gmaps API loaded)
     do_setup();
+
 
   }, function(error){
     console.log("Could not get location");
   });
 });
 
-
-function add_marker_current_location(scope, userCurrentLocation){
-  google.maps.event.addListenerOnce(scope.map, 'idle', function(){
+function add_marker_at_location(location){
+  google.maps.event.addListenerOnce(globalScope.map, 'idle', function(){
    
     var marker = new google.maps.Marker({
-        map: scope.map,
+        map: globalScope.map,
         animation: google.maps.Animation.DROP,
-        position: userCurrentLocation
+        position: location
     });     
    
   });
@@ -106,13 +107,48 @@ function calculate_path_distance_between(latLngOrigin, latLngDestination, direct
 
 }
 
+// A method to create a marker on the position of a given place
+function createMarker(place) {
+  var placeLoc = place.geometry.location;
+  var marker = new google.maps.Marker({
+  map: globalScope.map,
+  position: place.geometry.location 
+  });
+}
+
+// A method to search for places 
+function search(currentLocation, radius, placeType){
+  var service = new google.maps.places.PlacesService(globalScope.map);
+
+  // The specifications for the search
+  var request = {
+    location: currentLocation,
+    radius: radius,
+     type: [placeType]
+  };
+
+  // Perform the search
+  service.nearbySearch(request, callback);
+
+  // A method to deal with the results of the search
+  function callback(results, status) {
+    if (status === google.maps.places.PlacesServiceStatus.OK) {
+
+      console.log("Callback: Number of results - " + results.length);
+      for (var i = 0; i < results.length; i++) {
+        createMarker(results[i]);
+      }
+    }
+  }
+}
+
 function do_setup(){
 // add marker to current location
-add_marker_current_location(globalScope, userCurrentLocation);
+add_marker_at_location(userCurrentLocation);
 
 // calculate distance between current location and X
 calculate_path_distance_between(userCurrentLocation, 'Trafford Park', directionsService);
 
 // Test for search
-search($scope, userCurrentLocation, 500, 'store');
+search(userCurrentLocation, 5000, 'gas_station');
 }

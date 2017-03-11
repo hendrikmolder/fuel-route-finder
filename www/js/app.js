@@ -28,11 +28,15 @@ angular.module('starter', ['ionic', 'ngCordova'])
 .config(function($stateProvider, $urlRouterProvider) {
  
   $stateProvider
-  .state('map', {
-    url: '/',
-    templateUrl: 'templates/map.html',
-    controller: 'MapCtrl'
-  });
+    .state('landing', {
+      url: '/',
+      templateUrl: 'templates/landing.html',
+    })
+    .state('map', {
+      url: '/map',
+      templateUrl: 'templates/map.html',
+      controller: 'MapCtrl',
+    })
  
   $urlRouterProvider.otherwise("/");
  
@@ -40,9 +44,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
 
 .controller('MapCtrl', function($scope, $state, $cordovaGeolocation) {
   var options = {timeout: 10000, enableHighAccuracy: true};
-
-  globalScope = $scope;
-
+ 
   $cordovaGeolocation.getCurrentPosition(options).then(function(position){
  
     var userCurrentLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
@@ -63,12 +65,17 @@ angular.module('starter', ['ionic', 'ngCordova'])
     // calculate distance between current location and X
     calculate_path_distance_between(userCurrentLocation, 'Trafford Park', $scope, directionsService);
 
+    // Test for search
+    search($scope, userCurrentLocation, 500, 'store');
+
   }, function(error){
     console.log("Could not get location");
   });
-});
+})
 
-var globalScope;
+.controller('MainPageController', function($scope, $state) {
+
+});
 
 function add_marker_current_location($scope, userCurrentLocation){
   google.maps.event.addListenerOnce($scope.map, 'idle', function(){
@@ -102,4 +109,39 @@ function calculate_path_distance_between(latLngOrigin, latLngDestination, $scope
     }
   });
 
+}
+
+// A method to create a marker on the position of a given place
+function createMarker($scope, place) {
+  var placeLoc = place.geometry.location;
+  var marker = new google.maps.Marker({
+  map: $scope.map,
+  position: place.geometry.location 
+  });
+}
+
+// A method to search for places 
+function search($scope, currentLocation, radius, placeType){
+  var service = new google.maps.places.PlacesService($scope.map);
+
+  // The specifications for the search
+  var request = {
+    location: currentLocation,
+    radius: radius,
+     type: [placeType]
+  };
+
+  // Perform the search
+  service.nearbySearch(request, callback);
+
+  // A method to deal with the results of the search
+  function callback(results, status) {
+    if (status === google.maps.places.PlacesServiceStatus.OK) {
+
+      console.log("Callback: Number of results - " + results.length);
+      for (var i = 0; i < results.length; i++) {
+        createMarker($scope, results[i]);
+      }
+    }
+  }
 }

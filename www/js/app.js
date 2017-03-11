@@ -51,6 +51,8 @@ angular.module('starter', ['ionic', 'ngCordova'])
   var options = {timeout: 10000, enableHighAccuracy: true};
  
   $cordovaGeolocation.getCurrentPosition(options).then(function(position){
+
+    globalScope = $scope;
  
     userCurrentLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
  

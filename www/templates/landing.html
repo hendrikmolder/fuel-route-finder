@@ -1,5 +1,6 @@
 <ion-view view-title="Trip Details">
   <ion-content>
+
       <!-- Here -->
       <p class="padding"><button class="button button-block button-balanced">
         Time Allowance
@@ -9,6 +10,34 @@
       </button></p>
 
       <div class="img-circular"></div>
+
+    <p class="padding"><div class="bar bar-header">
+      <ion-menu [content]="content"></ion-menu>
+
+      <div class="h1 title">FuelSaver</div>
+      <a class="button button-icon icon ion-settings"></a>
+      </div><br></p>
+
+      <div class="bar bar-header item-input-inset">
+  <label class="item-input-wrapper">
+    <i class="icon ion-ios-search placeholder-icon"></i>
+    <input type="search" placeholder="Search">
+  </label>
+  <button class="button button-clear">
+    Cancel
+  </button>
+</div>
+
+      <ion-item>
+        <div class = "item range">
+          <i class="icon ion-soup-can-outline"></i>
+          <input type = "range" name = "Fuel">
+          <i class="icon ion-soup-can"></i>
+        </div>
+      </ion-item>
+
+
     <a class="button icon-right ion-chevron-right button-calm" href="#/map">Map</a>
+
   </ion-content>
 </ion-view>

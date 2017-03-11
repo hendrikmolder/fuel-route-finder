@@ -7,6 +7,8 @@
 var globalScope;
 var userCurrentLocation;
 var directionsService;
+var gallonsPerMile;
+var destinationLocation;
 
 angular.module('starter', ['ionic'])
 // require ngCordova
@@ -55,6 +57,8 @@ angular.module('starter', ['ionic', 'ngCordova'])
     globalScope = $scope;
  
     userCurrentLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+
+    litersPerKilometer = 1.5;
  
     var mapOptions = {
       center: userCurrentLocation,
@@ -75,7 +79,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
   }, function(error){
     console.log("Could not get location");
   });
-})
+}) // controller 
 
 function add_marker_at_location(location){
   google.maps.event.addListenerOnce(globalScope.map, 'idle', function(){
@@ -102,7 +106,8 @@ function calculate_path_distance_between(latLngOrigin, latLngDestination, direct
   directionsService.route(request, function(response, status) {
     if ( status == google.maps.DirectionsStatus.OK ) {
       // distance in metres
-      console.log(response.routes[0].legs[0].distance.value);
+      console.log("Distance " + response.routes[0].legs[0].distance.value);
+      return response.routes[0].legs[0].distance.value;
     }
     else {
       console.log("Error calling calculate_path_distance_between().");
@@ -141,6 +146,9 @@ function search(currentLocation, radius, placeType){
       console.log("Callback: Number of results - " + results.length);
       for (var i = 0; i < results.length; i++) {
         createMarker(results[i]);
+
+      console.log("Gas station number " + (i + 1));
+      console.log(costForDistance(1.5, calculate_path_distance_between(userCurrentLocation, 'Trafford Park', directionsService)));
       }
     }
   }
@@ -155,4 +163,12 @@ calculate_path_distance_between(userCurrentLocation, 'Trafford Park', directions
 
 // Test for search
 search(userCurrentLocation, 5000, 'gas_station');
+}
+
+function costForDistance(costPerGallon, distance){
+  console.log(costPerGallon + " " + distance);
+  var distanceInMiles = distance / 1609.344; 
+  var cost = distanceInMiles * gallonsPerMile * costPerGallon;
+
+  return cost;
 }

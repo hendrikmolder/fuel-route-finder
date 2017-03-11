@@ -7,10 +7,13 @@
 var globalScope;
 var userCurrentLocation;
 var directionsService;
-var gallonsPerMile;
+var gallonsPerMile = 1.5;
 var destinationLocation;
 var db = null;
 var cordovaSQL;
+var shortestPath = 9999999;
+var minimumCost = 9999999;
+var endDestination;
 
 angular.module('starter', ['ionic'])
 // require ngCordova
@@ -74,6 +77,8 @@ angular.module('starter', ['ionic', 'ngCordova'])
 
     globalScope = $scope;
     cordovaSQL = $cordovaSQLite;
+
+    endDestination =  new google.maps.LatLng(53.4575651, -2.2243494);
  
     userCurrentLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
  
@@ -186,13 +191,31 @@ service.nearbySearch(request, function(results, status){
     for (var i = 0; i < 10; i++) {
       createMarker(results[i]);
       calculate_path_distance_between(userCurrentLocation, results[i].geometry.location, directionsService, function(dist){
+    //console.log(results);
+    //console.log("Callback: Number of results: " + results.length);
+    for (var i = 0; i < Math.min(10, results.length); i++) {
+      createMarker(results[i]);
+      //console.log(results[i].geometry.location);
+    // console.log("Gas station number " + i );
+      calculate_path_distance_between(userCurrentLocation, results[i].geometry.location, directionsService, function(dist){
+      shortestPath = Math.min(shortestPath, dist);
+      var costToStation = costForDistance(2, dist);
+
+      console.log("New shortest path: " + shortestPath);
+      console.log("Distance to gas station " + dist);
+      console.log("Cost to gas station: " + costToStation);
     });
     }
   }
   else{
     console.log("error on callback of search  " + results + status);
   }
+
+  //console.log("Shortest path: " + shortestPath);
 });
+
+//console.log("Shortest path: " + shortestPath);
+
 }
 
 //console.log(calculate_path_distance_between(userCurrentLocation, 'Trafford Park', directionsService));
@@ -207,10 +230,13 @@ function costForDistance(costPerGallon, distance){
 function do_setup(){
 // add marker to current location
 add_marker_at_location(userCurrentLocation);
-
+add_marker_at_location(endDestination);
 // calculate distance between current location and X
 // calculate_path_distance_between(userCurrentLocation, 'Trafford Park', directionsService);
 
 // Test for search
 search(5000, 'gas_station');
+
+console.log("fsd");
+console.log("Shortest path: " + shortestPath);
 }

@@ -1,14 +1,25 @@
 <ion-view view-title="Trip Details">
   <ion-content>
-      <!-- Here -->
-      <p class="padding"><button class="button button-block button-balanced">
-        Time Allowance
-      </button></p>
-      <p class="padding"><button class="button button-block button-balanced">
-        Petrol Estimation
-      </button></p>
+      <div class="bar bar-header item-input-inset">
+        <label class="item-input-wrapper">
+          <i class="icon ion-ios-search placeholder-icon"></i>
+          <center><input type="search" placeholder="Destination"></center>
+        </label>
+        <button class="button button-positive button-clear">
+          Cancel
+        </button>
+      </div>
+      <p><center>Adjust your fuel tank level</center></p>
+      <ion-item>
+        <div class = "item range">
+          <i class="icon ion-soup-can-outline"></i>
+          <input type="range" name = "Fuel">
+          <i class="icon ion-soup-can"></i>
+        </div>
+      </ion-item>
 
-      <div class="img-circular"></div>
-    <a class="button icon-right ion-chevron-right button-calm" href="#/map">Map</a>
+      <div class="bar bar-footer bar-balanced">
+        <a href="#/map"><div class="title">Navigate</div></a>
+      </div>
   </ion-content>
 </ion-view>

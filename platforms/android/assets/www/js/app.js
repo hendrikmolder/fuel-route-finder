@@ -7,6 +7,8 @@
 var globalScope;
 var userCurrentLocation;
 var directionsService;
+var gallonsPerMile;
+var destinationLocation;
 
 angular.module('starter', ['ionic'])
 // require ngCordova
@@ -75,7 +77,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
   }, function(error){
     console.log("Could not get location");
   });
-})
+}) // controller 
 
 function add_marker_at_location(location){
   google.maps.event.addListenerOnce(globalScope.map, 'idle', function(){
@@ -89,8 +91,10 @@ function add_marker_at_location(location){
   });
 }
 
-function calculate_path_distance_between(latLngOrigin, latLngDestination, directionsService){
+function calculate_path_distance_between(latLngOrigin, latLngDestination, directionsService, callback){
 
+  //console.log("LatLngDestination (geometry.location of array): " + typeof(latLngDestination));
+  
   // request dict to pass to directionService
   var request = {
                 // latLng of users current location
@@ -101,58 +105,97 @@ function calculate_path_distance_between(latLngOrigin, latLngDestination, direct
   
   directionsService.route(request, function(response, status) {
     if ( status == google.maps.DirectionsStatus.OK ) {
+
+      callback(response.routes[0].legs[0].distance.value);
       // distance in metres
-      console.log(response.routes[0].legs[0].distance.value);
+      //console.log("Distance " + response.routes[0].legs[0].distance.value);
+    }
+    else if (status == "OVER_QUERY_LIMIT"){
+      calculate_path_distance_between(latLngOrigin, latLngDestination, directionsService, callback);
     }
     else {
-      console.log("Error calling calculate_path_distance_between().");
+      console.log("Error calling calculate_path_distance_between(): ");
+      console.log(response);
+      console.log(status);
     }
   });
-
 }
 
 // A method to create a marker on the position of a given place
 function createMarker(place) {
+  //console.log(JSON.stringify(place, "\n", 3));
+  //var location = new google.maps.LatLng(place.geometry.location.lat(), place.geometry.location.lng());
+  //console.log(""+ place.geometry.location);
+  //var dist = calculate_path_distance_between(userCurrentLocation, location, directionsService);
+  //console.log(typeof(dist));
+  //console.log("Cost " + costForDistance(1.5, 5));
   var placeLoc = place.geometry.location;
   var marker = new google.maps.Marker({
   map: globalScope.map,
   position: place.geometry.location 
   });
+    //console.log("After: " + place.geometry.location);
 }
 
 // A method to search for places 
-function search(currentLocation, radius, placeType){
-  var service = new google.maps.places.PlacesService(globalScope.map);
+function search(radius, placeType){
+var service = new google.maps.places.PlacesService(globalScope.map);
 
-  // The specifications for the search
-  var request = {
-    location: currentLocation,
-    radius: radius,
-     type: [placeType]
-  };
-
-  // Perform the search
-  service.nearbySearch(request, callback);
-
-  // A method to deal with the results of the search
-  function callback(results, status) {
-    if (status === google.maps.places.PlacesServiceStatus.OK) {
-
-      console.log("Callback: Number of results - " + results.length);
-      for (var i = 0; i < results.length; i++) {
-        createMarker(results[i]);
-      }
+// The specifications for the search
+var request = {
+  location: userCurrentLocation,
+  radius: radius,
+   type: [placeType]
+};
+// Perform the search
+service.nearbySearch(request, function(results, status){
+  if (status == google.maps.places.PlacesServiceStatus.OK) {
+    //console.log(results);
+    //console.log("Callback: Number of results: " + results.length);
+    for (var i = 0; i < 10; i++) {
+      createMarker(results[i]);
+      //console.log(results[i].geometry.location);
+    // console.log("Gas station number " + i );
+    calculate_path_distance_between(userCurrentLocation, results[i].geometry.location, directionsService, function(dist){
+      console.log(dist);
+    });
     }
   }
+    // console.log(dist);
+    // cost = costForDistance(2, 5);
+    // //console.log("Cost " + costForDistance(1.5, dist));
+  //   setTimeout(function(){
+  //   for (var i = results.length/2; i < results.length; i++) {
+  //     createMarker(results[i]);
+  //     //console.log(results[i].geometry.location);
+  //   // console.log("Gas station number " + i );
+  //   calculate_path_distance_between(userCurrentLocation, results[i].geometry.location, directionsService, function(dist){
+  //     console.log(dist);
+  //   });}}, 5000);
+  // }
+  else{
+    console.log("error on callback of search  " + results + status);
+  }
+});
 }
+
+//console.log(calculate_path_distance_between(userCurrentLocation, 'Trafford Park', directionsService));
+function costForDistance(costPerGallon, distance){
+  //console.log(costPerGallon + " " + distance);
+  var distanceInMiles = distance / 1609.344; 
+  var cost = distanceInMiles * gallonsPerMile * costPerGallon;
+
+  return cost;
+}
+
 
 function do_setup(){
 // add marker to current location
 add_marker_at_location(userCurrentLocation);
 
 // calculate distance between current location and X
-calculate_path_distance_between(userCurrentLocation, 'Trafford Park', directionsService);
+// calculate_path_distance_between(userCurrentLocation, 'Trafford Park', directionsService);
 
 // Test for search
-search(userCurrentLocation, 5000, 'gas_station');
+search(5000, 'gas_station');
 }

@@ -7,14 +7,19 @@
 var globalScope;
 var userCurrentLocation;
 var directionsService;
-var gallonsPerMile;
+var gallonsPerMile = 1.5;
 var destinationLocation;
+var db = null;
+var cordovaSQL;
+var shortestPath = 9999999;
+var minimumCost = 9999999;
+var endDestination;
 
 angular.module('starter', ['ionic'])
 // require ngCordova
 angular.module('starter', ['ionic', 'ngCordova'])
 
-.run(function($ionicPlatform) {
+.run(function($ionicPlatform, $cordovaSQLite) {
   $ionicPlatform.ready(function() {
     if(window.cordova && window.cordova.plugins.Keyboard) {
       // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -29,6 +34,22 @@ angular.module('starter', ['ionic', 'ngCordova'])
     if(window.StatusBar) {
       StatusBar.styleDefault();
     }
+    if(window.cordova && window.cordova.plugins.Keyboard) {
+        cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+    }
+    if(window.StatusBar) {
+        StatusBar.styleDefault();
+    }
+    // init the database
+    if (window.cordova) {
+      db = $cordovaSQLite.openDB({ name: "studenthack.db" }); //device
+     console.log("Android");
+    }else{
+      db = window.openDatabase("studenthack.db", '1', 'my', 1024 * 1024 * 100); // browser
+      console.log("browser");
+
+    }
+    $cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS stations (id INTEGER PRIMARY KEY NOT NULL, LATITUDE Varchar(50), LONGITUDE Varchar(50), DIESEL_PRICE Varchar(20), PETROL_PRICE Varchar(20))");
   });
 })
 
@@ -49,12 +70,15 @@ angular.module('starter', ['ionic', 'ngCordova'])
  
 })
 
-.controller('MapCtrl', function($scope, $state, $cordovaGeolocation) {
+.controller('MapCtrl', function($scope, $state, $cordovaGeolocation, $cordovaSQLite) {
   var options = {timeout: 10000, enableHighAccuracy: true};
  
   $cordovaGeolocation.getCurrentPosition(options).then(function(position){
 
     globalScope = $scope;
+    cordovaSQL = $cordovaSQLite;
+
+    endDestination =  new google.maps.LatLng(53.4575651, -2.2243494);
  
     userCurrentLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
  
@@ -78,6 +102,20 @@ angular.module('starter', ['ionic', 'ngCordova'])
     console.log("Could not get location");
   });
 }) // controller 
+
+function get_price_at_location(lat, long){
+
+    var query = 'SELECT DIESEL_PRICE, PETROL_PRICE FROM station WHERE LATITUDE = ? AND LONGITUDE = ?';
+    cordovaSQL.execute(db, query, [lat, long]).then(function(res) {
+        if(res.rows.length > 0) {
+            console.log("SELECTED -> " + res.rows.item(0).firstname + " " + res.rows.item(0).lastname);
+        } else {
+            console.log("No results found at (" + lat + ", " + long + ")");
+        }
+    }, function (err) {
+        console.error(err);
+    });
+}
 
 function add_marker_at_location(location){
   google.maps.event.addListenerOnce(globalScope.map, 'idle', function(){
@@ -150,33 +188,30 @@ var request = {
 // Perform the search
 service.nearbySearch(request, function(results, status){
   if (status == google.maps.places.PlacesServiceStatus.OK) {
-    //console.log(results);
-    //console.log("Callback: Number of results: " + results.length);
-    for (var i = 0; i < 10; i++) {
+    for (var i = 0; i < Math.min(10, results.length); i++) {
       createMarker(results[i]);
       //console.log(results[i].geometry.location);
     // console.log("Gas station number " + i );
-    calculate_path_distance_between(userCurrentLocation, results[i].geometry.location, directionsService, function(dist){
-      console.log(dist);
+      calculate_path_distance_between(userCurrentLocation, results[i].geometry.location, directionsService, function(dist){
+      shortestPath = Math.min(shortestPath, dist);
+      var costToStation = costForDistance(2, dist);
+
+      console.log("New shortest path: " + shortestPath);
+      console.log("Distance to gas station " + dist);
+      console.log("Cost to gas station: " + costToStation);
     });
     }
   }
-    // console.log(dist);
-    // cost = costForDistance(2, 5);
-    // //console.log("Cost " + costForDistance(1.5, dist));
-  //   setTimeout(function(){
-  //   for (var i = results.length/2; i < results.length; i++) {
-  //     createMarker(results[i]);
-  //     //console.log(results[i].geometry.location);
-  //   // console.log("Gas station number " + i );
-  //   calculate_path_distance_between(userCurrentLocation, results[i].geometry.location, directionsService, function(dist){
-  //     console.log(dist);
-  //   });}}, 5000);
-  // }
+
   else{
     console.log("error on callback of search  " + results + status);
   }
+
+  //console.log("Shortest path: " + shortestPath);
 });
+
+//console.log("Shortest path: " + shortestPath);
+
 }
 
 //console.log(calculate_path_distance_between(userCurrentLocation, 'Trafford Park', directionsService));
@@ -188,14 +223,16 @@ function costForDistance(costPerGallon, distance){
   return cost;
 }
 
-
 function do_setup(){
 // add marker to current location
 add_marker_at_location(userCurrentLocation);
-
+add_marker_at_location(endDestination);
 // calculate distance between current location and X
 // calculate_path_distance_between(userCurrentLocation, 'Trafford Park', directionsService);
 
 // Test for search
 search(5000, 'gas_station');
+
+console.log("fsd");
+console.log("Shortest path: " + shortestPath);
 }

@@ -11,15 +11,18 @@
       </div>
       <p><center>Adjust your fuel tank level</center></p>
       <ion-item>
-        <div class = "item range">
+
+      
+           <div class = "item range" ng-controller="LandingCtrl">
           <i class="icon ion-soup-can-outline"></i>
-          <input type="range" name = "Fuel">
+        <input type="range" min="1" max="100" name = "Fuel"  ng-model = "range">
           <i class="icon ion-soup-can"></i>
         </div>
-      </ion-item>
+     
+       </ion-item>
 
-      <div class="bar bar-footer bar-balanced">
-        <a href="#/map"><div class="title">Navigate</div></a>
-      </div>
+        <div type="submit" ng-click="submit_form(routeData)" ng-controller="LandingCtrl" class="bar bar-footer bar-balanced">
+          <div class="title">Navigate</div>
+        </div>
   </ion-content>
 </ion-view>

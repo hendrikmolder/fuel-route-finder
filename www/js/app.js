@@ -19,8 +19,9 @@ angular.module('starter', ['ionic'])
 // require ngCordova
 angular.module('starter', ['ionic', 'ngCordova'])
 
-.run(function($ionicPlatform, $cordovaSQLite) {
+.run(function($ionicPlatform, $cordovaSQLite, $http) {
   $ionicPlatform.ready(function() {
+    cordovaSQL = $cordovaSQLite;
     if(window.cordova && window.cordova.plugins.Keyboard) {
       // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
       // for form inputs)
@@ -47,9 +48,32 @@ angular.module('starter', ['ionic', 'ngCordova'])
     }else{
       db = window.openDatabase("studenthack.db", '1', 'my', 1024 * 1024 * 100); // browser
       console.log("browser");
-
     }
     $cordovaSQLite.execute(db, "CREATE TABLE IF NOT EXISTS stations (id INTEGER PRIMARY KEY NOT NULL, LATITUDE Varchar(50), LONGITUDE Varchar(50), DIESEL_PRICE Varchar(20), PETROL_PRICE Varchar(20))");
+    //console.log(JSON.parse('/www/data.json'));
+    $http.get('data.json').success(function(response){
+      // console.log(typeof(response));
+      // console.log(response);
+      // query to see if the table has entries
+      var query = "SELECT * FROM stations WHERE id=?";
+      //var drop_query = "DROP TABLE stations"
+      //$cordovaSQLite.execute(db, drop_query).then(function(){});
+      var query = "SELECT COUNT(*) FROM stations";
+      $cordovaSQLite.execute(db, query).then(function(result) {
+              console.log(result.rows[0]["COUNT(*)"]);
+          // if the database has already been initialised, don't init again.
+          if(result.rows[0]["COUNT(*)"] == 0 || result.rows[0]["COUNT(*)"] == null) {
+            console.log(response.elements.length);
+              for(i in response.elements){
+                insert_row(i.lat, i.lon, null, null);
+              }
+              //console.log(JSON.parse('/www/data.json'))
+          }
+          else{
+            console.log("array already populated");
+          }
+      });
+    });
   });
 })
 
@@ -59,15 +83,25 @@ angular.module('starter', ['ionic', 'ngCordova'])
     .state('landing', {
       url: '/',
       templateUrl: 'templates/landing.html',
+      controller: 'LandingCtrl'
     })
     .state('map', {
       url: '/map',
       templateUrl: 'templates/map.html',
-      controller: 'MapCtrl',
+      controller: 'MapCtrl'
     })
  
   $urlRouterProvider.otherwise("/");
  
+})
+
+.controller('LandingCtrl', function($scope, $state) {
+  var doesthiswork = $scope.range;
+ $scope.submit_form = function(){
+                  console.log($scope.range);
+                  $state.go('map');
+                  // href="#/map"
+              }
 })
 
 .controller('MapCtrl', function($scope, $state, $cordovaGeolocation, $cordovaSQLite) {
@@ -75,8 +109,9 @@ angular.module('starter', ['ionic', 'ngCordova'])
  
   $cordovaGeolocation.getCurrentPosition(options).then(function(position){
 
+console.log($scope.routeData);
+
     globalScope = $scope;
-    cordovaSQL = $cordovaSQLite;
 
     endDestination =  new google.maps.LatLng(53.4575651, -2.2243494);
  
@@ -101,20 +136,30 @@ angular.module('starter', ['ionic', 'ngCordova'])
   }, function(error){
     console.log("Could not get location");
   });
+  
 }) // controller 
 
 function get_price_at_location(lat, long){
 
-    var query = 'SELECT DIESEL_PRICE, PETROL_PRICE FROM station WHERE LATITUDE = ? AND LONGITUDE = ?';
+    var query = 'SELECT DIESEL_PRICE, PETROL_PRICE FROM stations WHERE LATITUDE = \'?\' AND LONGITUDE = \'?\'';
     cordovaSQL.execute(db, query, [lat, long]).then(function(res) {
         if(res.rows.length > 0) {
-            console.log("SELECTED -> " + res.rows.item(0).firstname + " " + res.rows.item(0).lastname);
+            console.log("SELECTED -> " + res.rows.item(0).DIESEL_PRICE + " " + res.rows.item(0).PETROL_PRICE);
         } else {
             console.log("No results found at (" + lat + ", " + long + ")");
         }
     }, function (err) {
         console.error(err);
     });
+}
+
+function insert_row(lat, long, diesel, petrol){
+  var query = 'INSERT INTO stations (LATITUDE, LONGITUDE, DIESEL_PRICE, PETROL_PRICE) VALUES (?,?,?,?)';
+  cordovaSQL.execute(db, query, [lat, long, diesel, petrol]).then(function(res) {
+      console.log("INSERT ID -> " + res.insertId);
+  }, function (err) {
+      console.error(err);
+  });   
 }
 
 function add_marker_at_location(location){

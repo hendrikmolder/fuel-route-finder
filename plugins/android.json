@@ -13,6 +13,9 @@
         "cordova-plugin-device": {
             "PACKAGE_NAME": "com.ionicframework.ionicmaps912254"
         },
+        "cordova-plugin-geolocation": {
+            "PACKAGE_NAME": "com.ionicframework.ionicmaps912254"
+        },
         "cordova-plugin-splashscreen": {
             "PACKAGE_NAME": "com.ionicframework.ionicmaps912254"
         },
@@ -22,13 +25,10 @@
         "cordova-plugin-whitelist": {
             "PACKAGE_NAME": "com.ionicframework.ionicmaps912254"
         },
-        "ionic-plugin-keyboard": {
-            "PACKAGE_NAME": "com.ionicframework.ionicmaps912254"
-        },
-        "cordova-plugin-geolocation": {
-            "PACKAGE_NAME": "com.ionicframework.ionicmaps912254"
-        },
         "cordova-sqlite-storage": {
+            "PACKAGE_NAME": "com.ionicframework.ionicmaps912254"
+        },
+        "ionic-plugin-keyboard": {
             "PACKAGE_NAME": "com.ionicframework.ionicmaps912254"
         }
     },

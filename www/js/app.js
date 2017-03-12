@@ -272,7 +272,7 @@ service.nearbySearch(request, (response, status) => {
           console.log("New shortest path: " + shortestPath);
           console.log("Distance to gas station " + distanceToStation);
           console.log("Cost to gas station: " + costToStation);
-        }).catch((reject) => { console.log(reject) })
+        }).catch((reject) => {console.log(reject)})
 
     /*  
         if(event) {

@@ -5,13 +5,18 @@
 
       <div class="item item-input-inset">
         <label class="item-input-wrapper">
-          <input type="text" placeholder="miles per gallon">
+          <input type="number" placeholder="miles per gallon" ng-model="customQuote" required>
         </label>
-        <button class="button button-small">
+        <button class="button button-small" ng-disabled="isInvalid">
           Submit
         </button>
+
       </div>
 
+    </div>
+
+    <div class="bar bar-footer bar-balanced">
+      <a href="#/"><div class="title">Confirm</div></a>
     </div>
 
   </ion-content>

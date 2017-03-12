@@ -54,40 +54,67 @@ angular.module('starter', ['ionic', 'ngCordova'])
 })
 
 .config(function($stateProvider, $urlRouterProvider) {
- 
+
   $stateProvider
     .state('landing', {
       url: '/',
       templateUrl: 'templates/landing.html',
+      controller: 'LandingCtrl',
+    })
+    .state('settings', {
+      url: '/settings',
+      templateUrl: 'templates/settings.html',
+      controller: 'SettingsCtrl',
     })
     .state('map', {
       url: '/map',
       templateUrl: 'templates/map.html',
       controller: 'MapCtrl',
     })
- 
+
   $urlRouterProvider.otherwise("/");
- 
+
+})
+
+.controller('LandingCtrl', function($scope, $state, $cordovaGeolocation, $cordovaSQLite) {
+  $scope.volume;
+  $scope.minTank = 0;
+  $scope.tankCapacity;
+  $scope.maxTank;
+
+  $scope.letsChange = function(){
+  };
+
+
+})
+
+.controller('SettingsCtrl', function($scope, $state, $cordovaGeolocation, $cordovaSQLite) {
+  $scope.customQuote;
+  $scope.isinvalid = false;
+
+  $scope.checkVAl = function(){
+
+  }
 })
 
 .controller('MapCtrl', function($scope, $state, $cordovaGeolocation, $cordovaSQLite) {
   var options = {timeout: 10000, enableHighAccuracy: true};
- 
+
   $cordovaGeolocation.getCurrentPosition(options).then(function(position){
 
     globalScope = $scope;
     cordovaSQL = $cordovaSQLite;
 
     endDestination =  new google.maps.LatLng(53.4575651, -2.2243494);
- 
+
     userCurrentLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
- 
+
     var mapOptions = {
       center: userCurrentLocation,
       zoom: 15,
       mapTypeId: google.maps.MapTypeId.ROADMAP
     };
- 
+
     $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
     // init direction service
@@ -101,7 +128,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
   }, function(error){
     console.log("Could not get location");
   });
-}) // controller 
+}) // controller
 
 function get_price_at_location(lat, long){
 
@@ -119,20 +146,20 @@ function get_price_at_location(lat, long){
 
 function add_marker_at_location(location){
   google.maps.event.addListenerOnce(globalScope.map, 'idle', function(){
-   
+
     var marker = new google.maps.Marker({
         map: globalScope.map,
         animation: google.maps.Animation.DROP,
         position: location
-    });     
-   
+    });
+
   });
 }
-
+/*
 function calculate_path_distance_between(latLngOrigin, latLngDestination, directionsService){
 
   //console.log("LatLngDestination (geometry.location of array): " + typeof(latLngDestination));
-  
+
   // request dict to pass to directionService
   var request = {
                 // latLng of users current location
@@ -141,19 +168,26 @@ function calculate_path_distance_between(latLngOrigin, latLngDestination, direct
     travelMode  : google.maps.DirectionsTravelMode.DRIVING
   };
 
-  directionsService.route(request, (response, status) => {
-    if (status == 'OK') {
-      console.log('Status OK');
-      console.log('Function:', response.routes[0].legs[0].distance.value);
-      return response.routes[0].legs[0].distance.value;
-    } else if (status == 'ZERO_RESULTS') {
-      console.error(status);
-    } else if (status == 'OVER_QUERY_LIMIT') {
-      console.error(status)
-    }
+  return new Promise((resolve, reject) => {
+    directionsService.route(request, (response, status) => {
+      if (status == 'OK') {
+        console.log('Status OK');
+        console.log('Function:', response.routes[0].legs[0].distance.value);
+        //return response.routes[0].legs[0].distance.value;
+        resolve(response)
+      } else if (status == 'ZERO_RESULTS') {
+        console.error(status);
+        reject(status);
+      } else if (status == 'OVER_QUERY_LIMIT') {
+        console.error(status)
+        reject(status);
+      }
+    })
   })
+  
 
   /*directionsService.route(request, function(response, status) {
+
     if ( status == google.maps.DirectionsStatus.OK ) {
 
       callback(response.routes[0].legs[0].distance.value);
@@ -168,8 +202,8 @@ function calculate_path_distance_between(latLngOrigin, latLngDestination, direct
       console.log(response);
       console.log(status);
     }
-  });*/
-}
+  });
+}*/
 
 // A method to create a marker on the position of a given place
 function createMarker(place) {
@@ -187,7 +221,7 @@ function createMarker(place) {
     //console.log("After: " + place.geometry.location);
 }
 
-// A method to search for places 
+// A method to search for places
 function search(radius, placeType){
 var service = new google.maps.places.PlacesService(globalScope.map);
 
@@ -205,20 +239,54 @@ service.nearbySearch(request, (response, status) => {
       //console.log(results[i].geometry.location);
       console.log("Gas station number " + i );
 
-      calculate_path_distance_between(userCurrentLocation, response[i].geometry.location, directionsService, (event) => {
-        console.log(event);
-      }); 
+      //calculate_path_distance_between(userCurrentLocation, response[i].geometry.location, directionsService)
+       var request = {
+                      // latLng of users current location
+          origin      : userCurrentLocation, // a city, full address, landmark etc
+          destination : response[i].geometry.location,
+          travelMode  : google.maps.DirectionsTravelMode.DRIVING
+        };
 
-        /*console.log('SearchEvent:', e)
+        return new Promise((resolve, reject) => {
+          directionsService.route(request, (response, status) => {
+            if (status == 'OK') {
+              console.log('Status OK');
+              console.log('Function:', response.routes[0].legs[0].distance.value);
+              //return response.routes[0].legs[0].distance.value;
+              resolve(response)
+            } else if (status == 'ZERO_RESULTS') {
+              console.error(status);
+              reject(status);
+            } else if (status == 'OVER_QUERY_LIMIT') {
+              console.error(status)
+              reject(status);
+            }
+          })
+        }).then((response) => {
+          console.log('SearchEvent:', response)
+          var distanceToStation = response.routes[0].legs[0].distance.value;
+          shortestPath = Math.min(shortestPath, distanceToStation);
+          console.log(shortestPath);
+          var costToStation = costForDistance(2, distanceToStation);
 
-        shortestPath = Math.min(shortestPath, e);
-        //console.log(shortestPath);
-        var costToStation = costForDistance(2, e);
+          console.log("New shortest path: " + shortestPath);
+          console.log("Distance to gas station " + distanceToStation);
+          console.log("Cost to gas station: " + costToStation);
+        }).catch((reject) => { console.log(reject) })
+
+    /*  
+        if(event) {
+        console.log('SearchEvent:', event)
+
+        shortestPath = Math.min(shortestPath, event);
+        console.log(shortestPath);
+        var costToStation = costForDistance(2, event);
 
         console.log("New shortest path: " + shortestPath);
-        console.log("Distance to gas station " + e);
-        console.log("Cost to gas station: " + costToStation);*/
-      
+        console.log("Distance to gas station " + event);
+        console.log("Cost to gas station: " + costToStation);
+      }*/
+       
     }
   }
 
@@ -227,7 +295,7 @@ service.nearbySearch(request, (response, status) => {
   }
 
   //console.log("Shortest path: " + shortestPath);
-});
+})
 
 //console.log("Shortest path: " + shortestPath);
 
@@ -236,7 +304,7 @@ service.nearbySearch(request, (response, status) => {
 //console.log(calculate_path_distance_between(userCurrentLocation, 'Trafford Park', directionsService));
 function costForDistance(costPerGallon, distance){
   //console.log(costPerGallon + " " + distance);
-  var distanceInMiles = distance / 1609.344; 
+  var distanceInMiles = distance / 1609.344;
   var cost = distanceInMiles * gallonsPerMile * costPerGallon;
 
   return cost;

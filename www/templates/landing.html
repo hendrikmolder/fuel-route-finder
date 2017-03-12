@@ -10,16 +10,29 @@
           Cancel
         </button>
       </div>
+
+      <div class="list">
+
+     <div class="item item-input-inset">
+      <label class="item-input-wrapper">
+        <input type="number" placeholder="Tank capacity" ng-model="tankCapacity">
+      </label>
+      
+     </div>
+
+  </div>
+
       <p><center>Adjust your fuel tank level</center></p>
       <ion-item>
         <div class = "item range">
           <i class="icon ion-soup-can-outline"></i>
-          <input type="range" name = "Fuel">
+          <input type="range" ng-model="volume" max="{{tankCapacity}}" name="volume">
           <i class="icon ion-soup-can"></i>
         </div>
+        {{volume}}
       </ion-item>
       <ion-item>
-        <button class="button button-icon icon-left ion-settings">Settings</button>
+        <a href="#/settings"><button class="button button-icon icon-left ion-settings">Settings</button>
       </ion-item>
 
       <div class="bar bar-footer bar-balanced">

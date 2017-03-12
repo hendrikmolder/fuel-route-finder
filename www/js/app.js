@@ -78,21 +78,47 @@ angular.module('starter', ['ionic', 'ngCordova'])
 })
 
 .config(function($stateProvider, $urlRouterProvider) {
- 
+
   $stateProvider
     .state('landing', {
       url: '/',
       templateUrl: 'templates/landing.html',
-      controller: 'LandingCtrl'
+      controller: 'LandingCtrl',
+    })
+    .state('settings', {
+      url: '/settings',
+      templateUrl: 'templates/settings.html',
+      controller: 'SettingsCtrl',
     })
     .state('map', {
       url: '/map',
       templateUrl: 'templates/map.html',
       controller: 'MapCtrl'
     })
- 
+
   $urlRouterProvider.otherwise("/");
- 
+
+})
+
+// .controller('LandingCtrl', function($scope, $state, $cordovaGeolocation, $cordovaSQLite) {
+//   $scope.volume;
+//   $scope.minTank = 0;
+//   $scope.tankCapacity;
+//   $scope.maxTank;
+
+//   $scope.letsChange = function(){
+//   };
+
+
+// })
+
+.controller('SettingsCtrl', function($scope, $state, $cordovaGeolocation, $cordovaSQLite) {
+  $scope.customQuote;
+  $scope.isinvalid = false;
+
+  $scope.checkVAl = function(){
+
+  }
 })
 
 .controller('LandingCtrl', function($scope, $state) {
@@ -106,7 +132,7 @@ angular.module('starter', ['ionic', 'ngCordova'])
 
 .controller('MapCtrl', function($scope, $state, $cordovaGeolocation, $cordovaSQLite) {
   var options = {timeout: 10000, enableHighAccuracy: true};
- 
+
   $cordovaGeolocation.getCurrentPosition(options).then(function(position){
 
 console.log($scope.routeData);
@@ -114,15 +140,15 @@ console.log($scope.routeData);
     globalScope = $scope;
 
     endDestination =  new google.maps.LatLng(53.4575651, -2.2243494);
- 
+
     userCurrentLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
- 
+
     var mapOptions = {
       center: userCurrentLocation,
       zoom: 15,
       mapTypeId: google.maps.MapTypeId.ROADMAP
     };
- 
+
     $scope.map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
     // init direction service
@@ -138,6 +164,7 @@ console.log($scope.routeData);
   });
   
 }) // controller 
+ // controller
 
 function get_price_at_location(lat, long){
 
@@ -164,20 +191,20 @@ function insert_row(lat, long, diesel, petrol){
 
 function add_marker_at_location(location){
   google.maps.event.addListenerOnce(globalScope.map, 'idle', function(){
-   
+
     var marker = new google.maps.Marker({
         map: globalScope.map,
         animation: google.maps.Animation.DROP,
         position: location
-    });     
-   
+    });
+
   });
 }
 
 function calculate_path_distance_between(latLngOrigin, latLngDestination, directionsService, callback){
 
   //console.log("LatLngDestination (geometry.location of array): " + typeof(latLngDestination));
-  
+
   // request dict to pass to directionService
   var request = {
                 // latLng of users current location
@@ -185,7 +212,7 @@ function calculate_path_distance_between(latLngOrigin, latLngDestination, direct
     destination : latLngDestination,
     travelMode  : google.maps.DirectionsTravelMode.DRIVING
   };
-  
+
   directionsService.route(request, function(response, status) {
     if ( status == google.maps.DirectionsStatus.OK ) {
 
@@ -215,12 +242,12 @@ function createMarker(place) {
   var placeLoc = place.geometry.location;
   var marker = new google.maps.Marker({
   map: globalScope.map,
-  position: place.geometry.location 
+  position: place.geometry.location
   });
     //console.log("After: " + place.geometry.location);
 }
 
-// A method to search for places 
+// A method to search for places
 function search(radius, placeType){
 var service = new google.maps.places.PlacesService(globalScope.map);
 
@@ -262,7 +289,7 @@ service.nearbySearch(request, function(results, status){
 //console.log(calculate_path_distance_between(userCurrentLocation, 'Trafford Park', directionsService));
 function costForDistance(costPerGallon, distance){
   //console.log(costPerGallon + " " + distance);
-  var distanceInMiles = distance / 1609.344; 
+  var distanceInMiles = distance / 1609.344;
   var cost = distanceInMiles * gallonsPerMile * costPerGallon;
 
   return cost;

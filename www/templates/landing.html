@@ -1,4 +1,5 @@
 <ion-view view-title="Trip Details">
+  <a class="button button-icon icon ion-settings"></a>
   <ion-content>
       <div class="bar bar-header item-input-inset">
         <label class="item-input-wrapper">
@@ -9,6 +10,18 @@
           Cancel
         </button>
       </div>
+
+      <div class="list">
+
+     <div class="item item-input-inset">
+      <label class="item-input-wrapper">
+        <input type="number" placeholder="Tank capacity" ng-model="tankCapacity">
+      </label>
+      
+     </div>
+
+  </div>
+
       <p><center>Adjust your fuel tank level</center></p>
       <ion-item>
 
@@ -20,6 +33,14 @@
         </div>
      
        </ion-item>
+          <input type="range" ng-model="volume" max="{{tankCapacity}}" name="volume">
+          <i class="icon ion-soup-can"></i>
+        </div>
+        {{volume}}
+      </ion-item>
+      <ion-item>
+        <a href="#/settings"><button class="button button-icon icon-left ion-settings">Settings</button>
+      </ion-item>
 
         <div type="submit" ng-click="submit_form(routeData)" ng-controller="LandingCtrl" class="bar bar-footer bar-balanced">
           <div class="title">Navigate</div>

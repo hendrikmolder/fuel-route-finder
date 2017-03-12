@@ -9,8 +9,11 @@ var userCurrentLocation;
 var directionsService;
 var gallonsPerMile = 1.5;
 var destinationLocation;
+<<<<<<< HEAD
 var db = null;
 var cordovaSQL;
+=======
+>>>>>>> 1cb395b2b6aefd5f83b15f1ebe042002a3d57ef0
 var shortestPath = 9999999;
 var minimumCost = 9999999;
 var endDestination;
@@ -76,7 +79,10 @@ angular.module('starter', ['ionic', 'ngCordova'])
   $cordovaGeolocation.getCurrentPosition(options).then(function(position){
 
     globalScope = $scope;
+<<<<<<< HEAD
     cordovaSQL = $cordovaSQLite;
+=======
+>>>>>>> 1cb395b2b6aefd5f83b15f1ebe042002a3d57ef0
 
     endDestination =  new google.maps.LatLng(53.4575651, -2.2243494);
  
@@ -188,6 +194,11 @@ var request = {
 // Perform the search
 service.nearbySearch(request, function(results, status){
   if (status == google.maps.places.PlacesServiceStatus.OK) {
+<<<<<<< HEAD
+=======
+    //console.log(results);
+    //console.log("Callback: Number of results: " + results.length);
+>>>>>>> 1cb395b2b6aefd5f83b15f1ebe042002a3d57ef0
     for (var i = 0; i < Math.min(10, results.length); i++) {
       createMarker(results[i]);
       //console.log(results[i].geometry.location);

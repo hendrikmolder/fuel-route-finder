@@ -129,7 +129,7 @@ function add_marker_at_location(location){
   });
 }
 
-function calculate_path_distance_between(latLngOrigin, latLngDestination, directionsService, callback){
+function calculate_path_distance_between(latLngOrigin, latLngDestination, directionsService){
 
   //console.log("LatLngDestination (geometry.location of array): " + typeof(latLngDestination));
   
@@ -140,8 +140,20 @@ function calculate_path_distance_between(latLngOrigin, latLngDestination, direct
     destination : latLngDestination,
     travelMode  : google.maps.DirectionsTravelMode.DRIVING
   };
-  
-  directionsService.route(request, function(response, status) {
+
+  directionsService.route(request, (response, status) => {
+    if (status == 'OK') {
+      console.log('Status OK');
+      console.log('Function:', response.routes[0].legs[0].distance.value);
+      return response.routes[0].legs[0].distance.value;
+    } else if (status == 'ZERO_RESULTS') {
+      console.error(status);
+    } else if (status == 'OVER_QUERY_LIMIT') {
+      console.error(status)
+    }
+  })
+
+  /*directionsService.route(request, function(response, status) {
     if ( status == google.maps.DirectionsStatus.OK ) {
 
       callback(response.routes[0].legs[0].distance.value);
@@ -156,7 +168,7 @@ function calculate_path_distance_between(latLngOrigin, latLngDestination, direct
       console.log(response);
       console.log(status);
     }
-  });
+  });*/
 }
 
 // A method to create a marker on the position of a given place
@@ -169,8 +181,8 @@ function createMarker(place) {
   //console.log("Cost " + costForDistance(1.5, 5));
   var placeLoc = place.geometry.location;
   var marker = new google.maps.Marker({
-  map: globalScope.map,
-  position: place.geometry.location 
+    map: globalScope.map,
+    position: place.geometry.location 
   });
     //console.log("After: " + place.geometry.location);
 }
@@ -186,25 +198,32 @@ var request = {
    type: [placeType]
 };
 // Perform the search
-service.nearbySearch(request, function(results, status){
-  if (status == google.maps.places.PlacesServiceStatus.OK) {
-    for (var i = 0; i < Math.min(10, results.length); i++) {
-      createMarker(results[i]);
+service.nearbySearch(request, (response, status) => {
+  if (status == 'OK') {
+    for (var i = 0; i < Math.min(10, response.length); i++) {
+      createMarker(response[i]);
       //console.log(results[i].geometry.location);
-    // console.log("Gas station number " + i );
-      calculate_path_distance_between(userCurrentLocation, results[i].geometry.location, directionsService, function(dist){
-      shortestPath = Math.min(shortestPath, dist);
-      var costToStation = costForDistance(2, dist);
+      console.log("Gas station number " + i );
 
-      console.log("New shortest path: " + shortestPath);
-      console.log("Distance to gas station " + dist);
-      console.log("Cost to gas station: " + costToStation);
-    });
+      calculate_path_distance_between(userCurrentLocation, response[i].geometry.location, directionsService, (event) => {
+        console.log(event);
+      }); 
+
+        /*console.log('SearchEvent:', e)
+
+        shortestPath = Math.min(shortestPath, e);
+        //console.log(shortestPath);
+        var costToStation = costForDistance(2, e);
+
+        console.log("New shortest path: " + shortestPath);
+        console.log("Distance to gas station " + e);
+        console.log("Cost to gas station: " + costToStation);*/
+      
     }
   }
 
   else{
-    console.log("error on callback of search  " + results + status);
+    console.err("error on callback of search  " + results + status);
   }
 
   //console.log("Shortest path: " + shortestPath);
